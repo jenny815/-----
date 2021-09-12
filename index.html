@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    html,
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url(./home.jpg) no-repeat center/contain;
+
+    }
+
+    #game {
+      text-align: center;
+    }
+
+    .line {
+      display: inline-block;
+      text-align: center;
+    }
+
+    .keys {
+      width: 100px;
+      height: 100px;
+      border-radius: 50px;
+      color: rgb(109, 96, 63);
+      font-weight: bolder;
+      background: rgb(223, 177, 117);
+
+    }
+
+    .cats {
+      background-image: url(./cat-gif.gif);
+    }
+
+    .rabbits {
+      background-image: url(./rabbits.gif);
+      background-repeat: no-repeat;
+    }
+
+    .find {
+      background: white;
+      background-image: url(./hand.gif);
+    }
+
+    #btn-start {
+      width: 100px;
+      height: 25px;
+      border: 2px solid rgb(223, 207, 181);
+      border-radius: 20px;
+      background: rgb(235, 183, 53);
+      color: white;
+      font-weight: bolder;
+
+    }
+
+    #sco {
+      display: inline-block;
+      margin-top: 5%;
+      padding: 2%;
+      font-weight: bolder;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="game">
+    <table>
+      <tr class="line">
+        <td class="keys" id="keyq">Q</td>
+        <td class="keys" id="keyw">W</td>
+        <td class="keys" id="keye">E</td>
+        <td class="keys" id="keyr">R</td>
+        <td class="keys" id="keyt">T</td>
+        <td class="keys" id="keyy">Y</td>
+        <td class="keys" id="keyu">U</td>
+        <td class="keys" id="keyi">I</td>
+        <td class="keys" id="keyo">O</td>
+        <td class="keys" id="keyp">P</td>
+      </tr>
+      <tr class="line">
+        <td class="keys" id="keya">A</td>
+        <td class="keys" id="keys">S</td>
+        <td class="keys" id="keyd">D</td>
+        <td class="keys" id="keyf">F</td>
+        <td class="keys" id="keyg">G</td>
+        <td class="keys" id="keyh">H</td>
+        <td class="keys" id="keyj">J</td>
+        <td class="keys" id="keyk">K</td>
+        <td class="keys" id="keyl">L</td>
+      </tr>
+      <tr class="line">
+        <td class="keys" id="keyz">Z</td>
+        <td class="keys" id="keyx">X</td>
+        <td class="keys" id="keyc">C</td>
+        <td class="keys" id="keyv">V</td>
+        <td class="keys" id="keyb">B</td>
+        <td class="keys" id="keyn">N</td>
+        <td class="keys" id="keym">M</td>
+      </tr>
+    </table>
+    <div id="sco">
+      <input type="button" value="START" id="btn-start">
+      <br>
+      還剩:<span id="text-countdown">30</span>秒
+      <br>
+      目前分數:<span id="text-score">0</span>
+      <br>
+      最高紀錄:
+      <br>
+      玩家:<span id="highscore-player">--</span>
+      <br>
+      分數:<span id="highScore-score">0</span>
+    </div>
+  </div>
+</body>
+
+<script>
+  const btnStart = document.getElementById('btn-start')
+  const keys = document.getElementsByClassName('keys')
+  const textScore = document.getElementById('text-score')
+  const textHighScorePlayer = document.getElementById('highscore-player')
+  const textHighScore = document.getElementById('highScore-score')
+  const textCountDown = document.getElementById('text-countdown')
+
+  const audio = new Audio()
+  audio.src = './rihai.mp3'
+  // 一開始有變數紀錄玩家分數幾分
+  let score = 0
+  // 為了不讓變數被清掉
+  let timer = 0
+  // 遊戲時間
+  let countdown = 30
+
+  let highscore = { name: '', score: 0 }
+  const highStorage = JSON.parse(localStorage.getItem('type'))
+  if (highStorage !== null) {
+    highscore = highStorage
+    textHighScorePlayer.innerText = highscore.name
+    textHighScore.innerText = highscore.score
+  }
+
+  btnStart.onclick = () => {
+    btnStart.disabled = true
+    //重新點開始的時候，代表分數也會重來一次
+    score = 0
+    // 重新開始時，變數要重設
+    countdown = 30
+    score = 0
+    textScore.innerText = score
+
+    textCountDown.innerText = countdown
+    timer = setInterval(game, 3000)
+    game()
+
+    time = setInterval(gametime, 1000)
+    gametime()
+  }
+
+
+
+  const gametime = () => {
+    countdown--
+    textCountDown.innerText = countdown
+    if (countdown <= 0) {
+      clearInterval(timer)
+      clearInterval(time)
+      alert(`你得到${score}`)
+      btnStart.disabled = false
+      for (const key of keys) {
+        key.classList.remove('cats')
+        key.classList.remove('rabbits')
+        key.classList.remove('find')
+      }
+
+      if (score > highscore.score) {
+        audio.play()
+        highscore.score = score
+        highscore.name = prompt('最高分! 請輸入名字')
+        if (highscore.name === null || highscore.name.length === 0) {
+          highscore.name = '路人'
+        }
+        textHighScorePlayer.innerText = highscore.name
+        textHighScore.innerText = highscore.score
+        localStorage.setItem('type', JSON.stringify(highscore))
+      }
+    }
+  }
+  // game 每一秒會變換 function 寫會變換的內容
+  const game = () => {
+    for (const key of keys) {
+      key.classList.remove('cats')
+      key.classList.remove('rabbits')
+      key.classList.remove('find')
+    }
+    for (let i = 0; i <= 2; i++) {
+      const random = Math.floor(Math.random() * 26)
+      keys[random].classList.add('cats')
+    }
+    for (let i = 0; i <= 3; i++) {
+      const random = Math.floor(Math.random() * 26)
+      keys[random].classList.add('rabbits')
+    }
+  }
+
+
+
+  for (const key of keys) {
+    key.onclick = () => {
+      if (key.classList.contains('cats') || key.classList.contains('rabbits')) {
+        key.classList.remove('cats')
+        key.classList.remove('rabbits')
+        score++
+        textScore.innerText = score
+      }
+    }
+  }
+  document.onkeydown = (event) => {
+    if (event.code.includes('Key')) {
+      const target = document.getElementById(`key${event.key.toLowerCase()}`)
+      console.log(target)
+      if (target.classList.contains('cats') || target.classList.contains('rabbits')) {
+        target.classList.replace('cats', 'find')
+        target.classList.replace('rabbits', 'find')
+
+        score++
+        textScore.innerText = score
+      }
+    }
+    if (event.code.includes('Space')) {
+      btnStart.onclick()
+    }
+  }
+
+</script>
+
+</html>
